@@ -7,8 +7,9 @@ RUN apt-get update && apt-get install -y \
     unzip git curl libzip-dev zip \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Fix MPM issue (IMPORTANT 🔥)
-RUN a2dismod mpm_event && a2enmod mpm_prefork
+# Fix Apache (remove all MPM conflicts)
+RUN a2dismod mpm_event mpm_worker || true
+RUN a2enmod mpm_prefork
 
 # Enable rewrite
 RUN a2enmod rewrite
@@ -19,13 +20,14 @@ COPY . .
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
+# Permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Set Apache document root to public
+# Set public folder
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
+
+CMD ["apache2-foreground"]

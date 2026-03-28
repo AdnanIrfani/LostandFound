@@ -7,7 +7,10 @@ RUN apt-get update && apt-get install -y \
     unzip git curl libzip-dev zip \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Enable Apache rewrite
+# Fix MPM issue (IMPORTANT 🔥)
+RUN a2dismod mpm_event && a2enmod mpm_prefork
+
+# Enable rewrite
 RUN a2enmod rewrite
 
 # Copy project

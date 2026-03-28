@@ -15,7 +15,9 @@ COPY . .
 
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
-RUN php artisan config:clear
+
+# Run migrations (IMPORTANT)
+RUN php artisan migrate --force
 
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache

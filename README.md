@@ -23,6 +23,3 @@
 9. Start server:
    php artisan serve  
 
-## Admin Login
-Email: admin@example.com  
-Password: admin123  

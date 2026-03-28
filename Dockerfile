@@ -1,33 +1,24 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-WORKDIR /var/www/html
+WORKDIR /app
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     unzip git curl libzip-dev zip \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Fix Apache (remove all MPM conflicts)
-RUN a2dismod mpm_event mpm_worker || true
-RUN a2enmod mpm_prefork
-
-# Enable rewrite
-RUN a2enmod rewrite
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy project
 COPY . .
 
-# Install composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
+# Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissions
+# Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Set public folder
-RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+EXPOSE 8080
 
-EXPOSE 80
-
-CMD ["apache2-foreground"]
+CMD php -S 0.0.0.0:8080 -t public

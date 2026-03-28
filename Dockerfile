@@ -16,6 +16,7 @@ COPY . .
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+ENV DB_CONNECTION=mysql
 # Run migrations (IMPORTANT)
 RUN php artisan migrate --force
 
